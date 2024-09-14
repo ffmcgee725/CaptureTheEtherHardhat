@@ -24,9 +24,21 @@ describe('GuessTheSecretNumberChallenge', () => {
   });
 
   it('exploit', async () => {
-    /**
-     * YOUR CODE HERE
-     * */
+    const answerHash = '0xdb81b4d58595fbbbb592d3661a34cdca14d7ab379441400cbfa1b78bc447c365';
+
+    // We brute force all possible values of uint8 (0 to 255) to find the correct number
+    let correctAnswer;
+    for (let i = 0; i <= 255; i++) {
+      const hash = ethers.utils.keccak256([i]);
+      if (hash === answerHash) {
+        correctAnswer = i;
+        break;
+      }
+    }
+
+    await target.connect(attacker).guess(correctAnswer, {
+      value: utils.parseEther('1'),
+    });
 
     expect(await target.isComplete()).to.equal(true);
   });

